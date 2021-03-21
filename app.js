@@ -31,17 +31,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Set security HTTP headers
 app.use(helmet());
 
-// app.use(
-//   helmet.contentSecurityPolicy({
-//     directives: {
-//       defaultSrc: ["'self'", 'https:', 'http:', 'data:', 'ws:'],
-//       baseUri: ["'self'"],
-//       fontSrc: ["'self'", 'https:', 'http:', 'data:'],
-//       scriptSrc: ["'self'", 'https:', 'http:', 'blob:'],
-//       styleSrc: ["'self'", "'unsafe-inline'", 'https:', 'http:'],
-//     },
-//   })
-// );
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'", 'https:', 'http:', 'data:', 'ws:'],
+      baseUri: ["'self'"],
+      fontSrc: ["'self'", 'https:', 'http:', 'data:'],
+      scriptSrc: ["'self'", "trusted-cdn.com", 'https:', 'http:', 'blob:'],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https:', 'http:'],
+    },
+  })
+);
+
+
+
 // app.use(
 //   helmet({
 //     contentSecurityPolicy: {
@@ -55,10 +58,12 @@ app.use(helmet());
 //           'http:',
 //           'blob:',
 //           'https://*.mapbox.com',
+//           'https://*.stripe.com',
 //           'https://js.stripe.com',
 //           'https://*.cloudflare.com',
 //           'https://cdnjs.cloudflare.com',
 //           'https://api.mapbox.com',
+//           'https://js.stripe.com/v3/',
 //         ],
 //         frameSrc: [
 //           "'self'", 'https://js.stripe.com',
@@ -85,26 +90,28 @@ app.use(helmet());
 //   })
 // );
 
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'", 'http://127.0.0.1:3000/*'],
-        baseUri: ["'self'"],
-        fontSrc: ["'self'", 'https:', 'data:'],
-        scriptSrc: [
-          "'self'",
-          'https://*.stripe.com',
-          'https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js',
-        ],
-        frameSrc: ["'self'", 'https://*.stripe.com'],
-        objectSrc: ["'none'"],
-        styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
-        upgradeInsecureRequests: [],
-      },
-    },
-  })
-);
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: {
+//       directives: {
+//         defaultSrc: ["'self'", 'http://127.0.0.1:3000/*'],
+//         baseUri: ["'self'"],
+//         fontSrc: ["'self'", 'https:', 'data:'],
+//         scriptSrc: [
+//           "'self'",
+//           'https://*.stripe.com',
+//           'https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js',
+//         ],
+//         frameSrc: ["'self'", 'https://*.stripe.com'],
+//         objectSrc: ["'none'"],
+//         styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
+//         upgradeInsecureRequests: [],
+//       },
+//     },
+//   })
+// );
+
+
 // Development logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
