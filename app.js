@@ -1,22 +1,35 @@
-// Adding Express.js
+// Adding Require Packages
 const express = require('express');
+const morgan = require('morgan');
+
+const tourRouter = require('./Routes/tourRoutes');
+const userRouter = require('./Routes/userRoutes');
 
 const app = express();
 
-// Creating Routes
+// Middlewares
+console.log(process.env.NODE_ENV);
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+app.use(express.json());
 
-app.get('/', (req, res) => {
-  res
-    .status(200)
-    .json({ message: 'Hello from the server side!', app: 'Natours' });
+app.use(express.static(`${__dirname}/public`));
+
+app.use((req, res, next) => {
+  console.log('Hello from the middleware!');
+  next();
 });
 
-app.post('/', (req, res) => {
-  res.send('You can post to this endpoint...');
-});
+// 3)) Creating Routes, route handler
+/* app.get('/api/v1/tours', getAllTours);
+app.post('/api/v1/tours', createTour);
+app.get('/api/v1/tours/:id', getTour);
+app.patch('/api/v1/tours/:id', updateTour);
+app.delete('/api/v1/tours/:id', deleteTour); */
+// Mounting Routers
 
-// Creating Port
-const port = 3000;
-app.listen(port, () => {
-  console.log(`App running on port: ${port}`);
-});
+app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', userRouter);
+// Creating Server
+module.exports = app;
