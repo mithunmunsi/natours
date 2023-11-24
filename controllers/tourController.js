@@ -3,16 +3,13 @@ const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
-// CREATING VARIABLE FOR ROUTES Handler
-
-exports.aliasTopTour = (req, res, next) => {
+exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5';
   req.query.sort = '-ratingsAverage,price';
   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
   next();
 };
 
-// GET ALL TOURS
 exports.getAllTours = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(Tour.find(), req.query)
     .filter()
@@ -21,6 +18,7 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
     .paginate();
   const tours = await features.query;
 
+  // SEND RESPONSE
   res.status(200).json({
     status: 'success',
     results: tours.length,
@@ -30,13 +28,14 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
   });
 });
 
-// GET ONE TOUR BY ID
 exports.getTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findById(req.params.id);
+  // Tour.findOne({ _id: req.params.id })
 
   if (!tour) {
     return next(new AppError('No tour found with that ID', 404));
   }
+
   res.status(200).json({
     status: 'success',
     data: {
@@ -45,7 +44,6 @@ exports.getTour = catchAsync(async (req, res, next) => {
   });
 });
 
-// CREATE NEW TOUR
 exports.createTour = catchAsync(async (req, res, next) => {
   const newTour = await Tour.create(req.body);
 
@@ -57,12 +55,15 @@ exports.createTour = catchAsync(async (req, res, next) => {
   });
 });
 
-// UPDATE TOUR
 exports.updateTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
   });
+
+  if (!tour) {
+    return next(new AppError('No tour found with that ID', 404));
+  }
 
   res.status(200).json({
     status: 'success',
@@ -72,9 +73,12 @@ exports.updateTour = catchAsync(async (req, res, next) => {
   });
 });
 
-// DELETE TOUR
 exports.deleteTour = catchAsync(async (req, res, next) => {
-  await Tour.findByIdAndDelete(req.params.id);
+  const tour = await Tour.findByIdAndDelete(req.params.id);
+
+  if (!tour) {
+    return next(new AppError('No tour found with that ID', 404));
+  }
 
   res.status(204).json({
     status: 'success',
@@ -82,7 +86,6 @@ exports.deleteTour = catchAsync(async (req, res, next) => {
   });
 });
 
-// AGGREGATION PIPELINE
 exports.getTourStats = catchAsync(async (req, res, next) => {
   const stats = await Tour.aggregate([
     {
@@ -93,7 +96,7 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
         _id: { $toUpper: '$difficulty' },
         numTours: { $sum: 1 },
         numRatings: { $sum: '$ratingsQuantity' },
-        avgRatings: { $avg: '$ratingsAverage' },
+        avgRating: { $avg: '$ratingsAverage' },
         avgPrice: { $avg: '$price' },
         minPrice: { $min: '$price' },
         maxPrice: { $max: '$price' },
@@ -102,6 +105,9 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
     {
       $sort: { avgPrice: 1 },
     },
+    // {
+    //   $match: { _id: { $ne: 'EASY' } }
+    // }
   ]);
 
   res.status(200).json({
@@ -112,10 +118,8 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
   });
 });
 
-// FUNCTION
-
 exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
-  const year = req.params.year * 1;
+  const year = req.params.year * 1; // 2021
 
   const plan = await Tour.aggregate([
     {
@@ -140,7 +144,9 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
       $addFields: { month: '$_id' },
     },
     {
-      $project: { _id: 0 },
+      $project: {
+        _id: 0,
+      },
     },
     {
       $sort: { numTourStarts: -1 },
