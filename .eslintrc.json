@@ -13,8 +13,18 @@
     "no-return-await": "off",
     "no-underscore-dangle": "off",
     "class-methods-use-this": "off",
-    "prefer-destructuring": ["error", { "object": true, "array": false }],
+    "prefer-destructuring": ["off", { "object": true, "array": false }],
     "import/no-extraneous-dependencies": ["off", { "devDependencies": true }],
-    "no-unused-vars": ["off", { "argsIgnorePattern": "req|res|next|val" }]
+    "import/no-unresolved": "off",
+    "import/extensions": "off",
+    "no-unused-vars": ["off", { "argsIgnorePattern": "req|res|next|val" }],
+    "node/no-missing-require": [
+      "off",
+      {
+        "allowModules": [],
+        "resolvePaths": ["/path/to/a/modules/directory"],
+        "tryExtensions": [".js", ".json", ".node"]
+      }
+    ]
   }
 }
